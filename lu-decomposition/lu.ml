@@ -67,44 +67,10 @@ let lup a0 =
   done;
   (p, lu)
 
-(** Matrix multiplication *)
-let gemm x y =
-  let m, k = Array.matrix_size x in
-  let k', n = Array.matrix_size y in
-  assert(k = k');
-  Array.init_matrix m n
-    (fun i j -> sumi (fun l -> x.(i).(l) *. y.(l).(j)) 0 (k - 1))
+let main () =
+  let n = 500 in
+  let a = Array.init_matrix n n (fun _ _ -> Random.float 20.0 -. 10.0) in
+  ignore (lup a);
+  print_endline "finished."
 
-let print_mat label x =
-  printf "%s =@\n" label;
-  Array.iter (fun xi ->
-      Array.iter (printf "  %10g") xi;
-      print_newline ()) x
-
-let () =
-  let a =
-    [|
-      [| 0.; 2.; 3.; 0.; 9.|];
-      [|-1.; 1.; 4.; 2.; 3.|];
-      [| 6.; 0.;-9.; 1.; 0.|];
-      [| 3.; 5.; 0.; 0.; 1.|];
-      [|-8.; 3.; 1.;-5.; 2.|];
-      [|-2.;-1.;-1.; 4.; 6.|]
-    |] in
-  let p, lu = lup a in
-  let m, n = Array.matrix_size lu in
-  let r = min m n in
-  let l = (* a lower trapezoidal matrix *)
-    Array.init_matrix m r
-      (fun i j -> if i > j then lu.(i).(j) else if i = j then 1.0 else 0.0) in
-  let u = (* an upper trapezoidal matrix *)
-    Array.init_matrix r n
-      (fun i j -> if i <= j then lu.(i).(j) else 0.0) in
-  let p = (* a permutation matrix *)
-    Array.init_matrix m m (fun i j -> if i = p.(j) then 1.0 else 0.0) in
-  let a' = gemm p (gemm l u) in (* ['a] is equal to [a]. *)
-  print_mat "matrix A" a;
-  print_mat "matrix L" l;
-  print_mat "matrix U" u;
-  print_mat "matrix P" p;
-  print_mat "matrix P * L * U" a'
+let () = main ()
