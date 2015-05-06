@@ -85,6 +85,14 @@ let print_mat label x =
       Array.iter (printf "  %5.2f") xi;
       print_newline ()) x
 
+let gather t =
+  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+
+let c = Gc.get ()
+let () = Gc.set
+    { c with Gc.minor_heap_size = 32000000;
+             Gc.space_overhead = max_int }
+
 let () =
   let a =
     [|
@@ -94,8 +102,13 @@ let () =
       [| 6.; 0.;-9.; 1.; 0.|];
       [|-8.; 3.; 1.;-5.; 2.|];
     |] in
-  let q = orthonormalize a in
-  let r = calc_r a q in
-  print_mat "Q [orthogonal matrix]" q;
-  print_mat "R [right triangular matrix]" r;
-  print_mat "Q * R" (gemm q r)
+  let t1 = Unix.times () in
+  for i = 1 to 600000 do
+    let q = orthonormalize a in
+    let r = calc_r a q in
+    ignore (gemm q r);
+    Gc.minor ()
+  done;
+  let t2 = Unix.times () in
+  gather t2 -. gather t1
+  |> Format.printf "%f\n"

@@ -81,6 +81,14 @@ let print_mat label x =
       Array.iter (printf "  %10g") xi;
       print_newline ()) x
 
+let gather t =
+  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+
+let c = Gc.get ()
+let () = Gc.set
+    { c with Gc.minor_heap_size = 32000000;
+             Gc.space_overhead = max_int }
+
 let () =
   let a =
     [|
@@ -91,20 +99,27 @@ let () =
       [|-8.; 3.; 1.;-5.; 2.|];
       [|-2.;-1.;-1.; 4.; 6.|]
     |] in
-  let p, lu = lup a in
-  let m, n = Array.matrix_size lu in
-  let r = min m n in
-  let l = (* a lower trapezoidal matrix *)
-    Array.init_matrix m r
-      (fun i j -> if i > j then lu.(i).(j) else if i = j then 1.0 else 0.0) in
-  let u = (* an upper trapezoidal matrix *)
-    Array.init_matrix r n
-      (fun i j -> if i <= j then lu.(i).(j) else 0.0) in
-  let p = (* a permutation matrix *)
-    Array.init_matrix m m (fun i j -> if i = p.(j) then 1.0 else 0.0) in
-  let a' = gemm p (gemm l u) in (* ['a] is equal to [a]. *)
-  print_mat "matrix A" a;
-  print_mat "matrix L" l;
-  print_mat "matrix U" u;
-  print_mat "matrix P" p;
-  print_mat "matrix P * L * U" a'
+  let t1 = Unix.times () in
+  for i = 1 to 600000 do
+    let p, lu = lup a in
+    let m, n = Array.matrix_size lu in
+    let r = min m n in
+    let l = (* a lower trapezoidal matrix *)
+      Array.init_matrix m r
+        (fun i j -> if i > j then lu.(i).(j) else if i = j then 1.0 else 0.0) in
+    let u = (* an upper trapezoidal matrix *)
+      Array.init_matrix r n
+        (fun i j -> if i <= j then lu.(i).(j) else 0.0) in
+    let p = (* a permutation matrix *)
+      Array.init_matrix m m (fun i j -> if i = p.(j) then 1.0 else 0.0) in
+    gemm p (gemm l u) (* ['a] is equal to [a]. *);
+    Gc.minor ()
+  done;
+  let t2 = Unix.times () in
+  gather t2 -. gather t1
+  |> Format.printf "%f\n"
+  (* print_mat "matrix A" a; *)
+  (* print_mat "matrix L" l; *)
+  (* print_mat "matrix U" u; *)
+  (* print_mat "matrix P" p; *)
+  (* print_mat "matrix P * L * U" a' *)
