@@ -33,6 +33,11 @@ module Array = struct
   let map2_sum f = fold_left2 (fun acc xi yi -> acc +. f xi yi) 0.0
 end
 
+let c = Gc.get ()
+let () = Gc.set
+    { c with Gc.minor_heap_size = 32000000;
+             Gc.space_overhead = max_int }
+
 (* ================================================================= *
  * BLAS-like functions for linear algebraic operations
  * ================================================================= *)

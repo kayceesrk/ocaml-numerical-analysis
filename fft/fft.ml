@@ -61,12 +61,13 @@ let main () =
   |]
     |> Array.map (fun x -> { re = x; im = 0.0 }) in
   let y = fft x in
-  printf "FFT =@\n  @[";
-  Array.iteri (fun i yi -> printf "[%d] %f %+fi@\n" i yi.re yi.im) y;
-  printf "@]@\n";
-  let z = ifft y in
-  printf "IFFT =@\n  @[";
-  Array.iteri (fun i zi -> printf "[%d] %f %+fi@\n" i zi.re zi.im) z;
-  printf "@]@."
+  ()
+  (* printf "FFT =@\n  @["; *)
+  (* Array.iteri (fun i yi -> printf "[%d] %f %+fi@\n" i yi.re yi.im) y; *)
+  (* printf "@]@\n"; *)
+  (* let z = ifft y in *)
+  (* printf "IFFT =@\n  @["; *)
+  (* Array.iteri (fun i zi -> printf "[%d] %f %+fi@\n" i zi.re zi.im) z; *)
+  (* printf "@]@." *)
 
 let () = main ()
