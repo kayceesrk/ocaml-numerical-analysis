@@ -5,10 +5,10 @@ test: ./my ./vanilla
 	./vanilla
 
 my: dka.ml
-	$(mycaml) -o my unix.cmxa dka.ml
+	$(mycaml) -o $@ -dclambda unix.cmxa dka.ml 2> $@.clam
 
 vanilla: dka.ml
-	$(vanilla) -o vanilla unix.cmxa dka.ml
+	$(vanilla) -o $@ unix.cmxa dka.ml 2> $@.clam
 
 clean:
 	rm ./my ./vanilla -f

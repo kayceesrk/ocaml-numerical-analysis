@@ -7,10 +7,10 @@ test: ./my ./vanilla
 	$(time) ./vanilla
 
 my: $(SOURCES)
-	$(mycaml) -g -o my $(SOURCES)
+	$(mycaml) -o $@ -dclambda $(SOURCES) 2> $@.clam
 
 vanilla: $(SOURCES)
-	$(vanilla) -g -o vanilla $(SOURCES)
+	$(vanilla) -o $@ -dclambda $(SOURCES) 2> $@.clam
 
 clean:
 	rm ./my ./vanilla -f
