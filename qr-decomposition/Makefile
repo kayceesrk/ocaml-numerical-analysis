@@ -1,4 +1,4 @@
-include ../Makefile
+include ../Makefile.shared
 
 SOURCES=qr.ml
 

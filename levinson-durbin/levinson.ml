@@ -50,10 +50,19 @@ let levinson r =
 let print_ar_coeffs label data order =
   let r = autocorr data (order + 1) in
   let (ar, sigma2) = levinson r in
-  let ar_str = Array.to_list ar
-               |> List.map (sprintf "%g")
-               |> String.concat "; " in
-  printf "%s:@\n  @[AR = [|%s|]@\nsigma^2 = %g@]@." label ar_str sigma2
+  ()
+  (* let ar_str = Array.to_list ar *)
+  (*              |> List.map (sprintf "%g") *)
+  (*              |> String.concat "; " in *)
+  (* printf "%s:@\n  @[AR = [|%s|]@\nsigma^2 = %g@]@." label ar_str sigma2 *)
+
+let gather t =
+  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+
+let c = Gc.get ()
+let () = Gc.set
+    { c with Gc.minor_heap_size = 32000000;
+             Gc.space_overhead = max_int }
 
 let main () =
   let order = 20 in (* AR order *)
@@ -63,4 +72,12 @@ let main () =
   print_ar_coeffs "Sound /e/" Dataset.e order;
   print_ar_coeffs "Sound /o/" Dataset.o order
 
-let () = main ()
+let () =
+  let t1 = Unix.times () in
+  for i = 1 to 5000 do
+    main () |> ignore;
+    Gc.minor ()
+  done;
+  let t2 = Unix.times () in
+  gather t2 -. gather t1
+  |> Format.printf "%f\n"

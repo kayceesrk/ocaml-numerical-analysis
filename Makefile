@@ -1,6 +1,18 @@
-flag=-unsafe -inline 1000000
+include Makefile.shared
 
-mycaml=~/git_ocaml/ocamlopt -nostdlib -I ~/git_ocaml/stdlib -I ~/git_ocaml/otherlibs/unix $(flag)
-# mycaml=ocamlopt -nostdlib -I ~/.opam/4.02.0/lib/ocaml $(flag)
-vanilla=~/vcaml/bin/ocamlopt -nostdlib -I ~/vcaml/lib/ocaml $(flag)
-time=time -f "%e %U %S"
+TESTS=neural-network/naive-multilayer durand-kerner-aberth fft k-means \
+	levinson-durbin lu-decomposition qr-decomposition
+
+HOME=$(shell pwd)
+RESULTS=$(foreach ITEM, $(TESTS), $(ITEM)/my.result $(ITEM)/vanilla.result)
+
+do_test: $(RESULTS)
+
+%/my: %/*.ml
+	make my
+
+%/vanilla: %/*.ml
+	make vanilla
+
+%.result: $(basename $@)
+	for i in `seq 1 99 `; do $(basename ./$@) >> ./$@; done

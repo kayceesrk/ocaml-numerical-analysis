@@ -1,4 +1,4 @@
-include ../../Makefile
+include ../../Makefile.shared
 
 SOURCES=dataset.ml neuralNetwork.ml
 

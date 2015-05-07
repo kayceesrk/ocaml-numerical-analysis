@@ -54,20 +54,28 @@ let ifft x =
   let normalize z = { re = c *. z.re; im = ~-. c *. z.im } in
   fft (Array.map normalize x)
 
+let c = Gc.get ()
+let () = Gc.set
+    { c with Gc.minor_heap_size = 32000000;
+             Gc.space_overhead = max_int }
+
+let gather t =
+  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+
 let main () =
   let x = [|
     1.0; 2.0; 3.0; 4.0; 5.0; 6.0; 7.0; 8.0;
     9.0; 10.0; 11.0; 12.0; 13.0; 14.0; 15.0; 16.0;
   |]
     |> Array.map (fun x -> { re = x; im = 0.0 }) in
-  let y = fft x in
-  ()
-  (* printf "FFT =@\n  @["; *)
-  (* Array.iteri (fun i yi -> printf "[%d] %f %+fi@\n" i yi.re yi.im) y; *)
-  (* printf "@]@\n"; *)
-  (* let z = ifft y in *)
-  (* printf "IFFT =@\n  @["; *)
-  (* Array.iteri (fun i zi -> printf "[%d] %f %+fi@\n" i zi.re zi.im) z; *)
-  (* printf "@]@." *)
+  fft x |> ifft |> ignore
 
-let () = main ()
+let () =
+  let t1 = Unix.times () in
+  for i = 1 to 500000 do
+    main ();
+    Gc.minor ()
+  done;
+  let t2 = Unix.times () in
+  gather t2 -. gather t1
+  |> Format.printf "%f\n"
