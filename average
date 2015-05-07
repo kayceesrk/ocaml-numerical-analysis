@@ -1,0 +1,5 @@
+#! /usr/bin/octave -qf
+
+str = argv();
+arr = load(str{1});
+printf ("%s %f\n", str{1}, mean(arr))
