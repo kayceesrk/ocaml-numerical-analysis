@@ -2,4 +2,4 @@ flag = -w -warn-error -unsafe -inline 1000000
 
 mycaml = ~/git_ocaml/ocamlopt -nostdlib -I ~/git_ocaml/stdlib -I ~/git_ocaml/otherlibs/unix $(flag)
 vanilla = ~/vcaml/bin/ocamlopt -nostdlib -I ~/vcaml/lib/ocaml $(flag)
-time = time -f "%e %U %S"
+time = time -f "%e"

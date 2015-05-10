@@ -56,6 +56,7 @@ let kmeans k xs =
   let cs = Array.init m (fun i -> i mod k) in (* class assignment *)
   let rec loop () =
     let means = calc_means cs in
+    Gc.minor ();
     if update means cs then loop () else (means, cs)
   in
   loop () (* loop until convergence *)
@@ -94,7 +95,7 @@ let main () =
 
 let () =
   let t1 = Unix.times () in
-  for i = 1 to 10000 do
+  for i = 1 to 3000 do
     main () |> ignore;
     Gc.minor ()
   done;

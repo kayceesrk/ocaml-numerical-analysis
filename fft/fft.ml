@@ -72,7 +72,7 @@ let main () =
 
 let () =
   let t1 = Unix.times () in
-  for i = 1 to 500000 do
+  for i = 1 to 200000 do
     main ();
     Gc.minor ()
   done;

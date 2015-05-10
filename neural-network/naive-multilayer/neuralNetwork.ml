@@ -246,8 +246,17 @@ let main samples =
     Array.iter (fun (x, t) ->
         (* check_gradient nnet x t; *)
         train ~eta:0.01 nnet x t) samples;
-    if i mod 100 = 0
-    then printf "Loop #%d: Error = %g@." i (evaluate nnet samples)
+    Gc.minor ()
+    (* if i mod 100 = 0 *)
+    (* then printf "Loop #%d: Error = %g@." i (evaluate nnet samples) *)
   done
 
-let () = main Dataset.samples
+let gather t =
+  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+
+let () =
+  let t1 = Unix.times () in
+  main Dataset.samples;
+  let t2 = Unix.times () in
+  gather t2 -. gather t1
+  |> Format.printf "%f\n"

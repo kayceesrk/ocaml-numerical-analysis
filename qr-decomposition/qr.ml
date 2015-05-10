@@ -103,7 +103,7 @@ let () =
       [|-8.; 3.; 1.;-5.; 2.|];
     |] in
   let t1 = Unix.times () in
-  for i = 1 to 600000 do
+  for i = 1 to 300000 do
     let q = orthonormalize a in
     let r = calc_r a q in
     ignore (gemm q r);

@@ -74,7 +74,7 @@ let main () =
 
 let () =
   let t1 = Unix.times () in
-  for i = 1 to 5000 do
+  for i = 1 to 1000 do
     main () |> ignore;
     Gc.minor ()
   done;

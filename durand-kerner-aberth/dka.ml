@@ -91,7 +91,7 @@ let gather t =
 
 let () =
   let t1 = Unix.times () in
-  for i = 1 to 200000 do
+  for i = 1 to 100000 do
     main ();
     Gc.minor ()
   done;
