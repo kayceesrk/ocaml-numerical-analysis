@@ -1,33 +1,52 @@
-include Makefile.shared
+FLAG = -w -warn-error -unsafe -inline 1000000 -p -g
 
-TESTS = naive-multilayer durand-kerner-aberth fft k-means \
-	levinson-durbin lu-decomposition qr-decomposition \
-#	rnd_access simple_access float_access
+FINDOPT= -package core,core_bench -linkpkg -thread
 
-RESULTS=$(foreach ITEM, $(TESTS), $(ITEM)/my.result $(ITEM)/vanilla.result)
+SOURCES = k-means/k_dataset.ml k-means/kmeans.ml naive-multilayer/neuralNetwork.ml \
+	naive-multilayer/n_dataset.ml lu-decomposition/lu.ml fft/fft.ml durand-kerner-aberth/dka.ml \
+	rnd_access/rnd.ml simple_access/a.ml qr-decomposition/qr.ml \
+	levinson-durbin/l_dataset.ml levinson-durbin/levinson.ml main.ml
 
-all: $(foreach ITEM, $(TESTS), $(ITEM)/my $(ITEM)/vanilla)
+OCAMLC= ocamlfind ocamlc
+OCAMLOPT= ocamlfind ocamlopt
 
-.PHONY: do_test clean clean_result average
+COMPFLAGS= $(FLAG) $(I-FLAG) $(FINDOPT)
 
-do_test: $(RESULTS)
+DIRS= ./k-means ./naive-multilayer ./lu-decomposition ./fft ./durand-kerner-aberth ./rnd_access \
+	./levinson-durbin ./simple_access ./qr-decomposition
 
-%/my: %/*.ml
-	cd $(dir $@) && make my
+VPATH = $(foreach DIR, $(DIRS), $(DIR):)
 
-%/vanilla: %/*.ml
-	cd $(dir $@) && make vanilla
+I-FLAG= $(foreach ITEM, $(DIRS), -I $(ITEM))
 
-%.result: % FORCE
-	for i in `seq 1 99 `; do $(basename ./$@) >> ./$@; done
+OBJS= $(patsubst %.ml, %.cmx, $(SOURCES))
 
-FORCE:
+test: $(OBJS)
+	$(OCAMLOPT) $(COMPFLAGS) -o $@ $(OBJS)
 
-clean:
-	rm -f */my */vanilla */*.cm? */*.o */*.clam
+# generic rules :
+#################
 
-clean_result:
-	find -name "*.result" -exec rm {} \;
+.SUFFIXES: .mll .mly .ml .mli .cmo .cmi .cmx
 
-average:
-	find -name "*.result" -exec ./average {} \;
+%.cmo: %.ml
+	$(OCAMLC) $(OCAMLPP) $(COMPFLAGS) -c $<
+
+%.cmi: %.mli
+	$(OCAMLC) $(OCAMLPP) $(COMPFLAGS) -c $<
+
+%.cmx: %.ml
+	$(OCAMLOPT) $(OCAMLPP) $(COMPFLAGS) -c $<
+
+
+# beforedepend::
+
+# depend: beforedepend
+# 	ocamldep $(INCLUDES) *.mli *.ml > .depend
+
+clean::
+	rm -f */*.cm?
+	rm -f */*.o
+	rm -f test
+	rm -f *.cm?
+# include .depend

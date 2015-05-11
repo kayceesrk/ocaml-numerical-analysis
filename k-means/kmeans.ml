@@ -56,49 +56,29 @@ let kmeans k xs =
   let cs = Array.init m (fun i -> i mod k) in (* class assignment *)
   let rec loop () =
     let means = calc_means cs in
-    Gc.minor ();
     if update means cs then loop () else (means, cs)
   in
   loop () (* loop until convergence *)
 
 let show_result k xs cs =
-  let ys = Array.map snd Dataset.samples in (* answers *)
+  let ys = Array.map snd K_dataset.samples in (* answers *)
   let tbl = Array.make_matrix k k 0 in
-  Array.iter2 (fun ci yi -> tbl.(ci).(yi) <- succ tbl.(ci).(yi)) cs ys;
-  for prd = 0 to k - 1 do
-    for ans = 0 to k - 1 do
-      printf "Prediction = %d, Answer = %d: %d points@\n"
-        prd ans tbl.(prd).(ans)
-    done
-  done
-
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
+  Array.iter2 (fun ci yi -> tbl.(ci).(yi) <- succ tbl.(ci).(yi)) cs ys
+  (* for prd = 0 to k - 1 do *)
+  (*   for ans = 0 to k - 1 do *)
+  (*     printf "Prediction = %d, Answer = %d: %d points@\n" *)
+  (*     prd ans tbl.(prd).(ans) *)
+  (*   done *)
+  (* done *)
 
 let main () =
-  let k = Dataset.n_classes in
-  let xs = Array.map fst Dataset.samples in
+  let k = K_dataset.n_classes in
+  let xs = Array.map fst K_dataset.samples in
   let (means, cs) = kmeans k xs in
-  ()
   (* printf "mean vectors:@\n"; *)
   (* Array.iteri (fun i mi -> *)
   (*     printf "[%d]" i; *)
   (*     Array.iter (printf " %.2f") mi; *)
   (*     print_newline ()) *)
   (*   means; *)
-  (* show_result k xs cs *)
-
-let () =
-  let t1 = Unix.times () in
-  for i = 1 to 3000 do
-    main () |> ignore;
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  show_result k xs cs

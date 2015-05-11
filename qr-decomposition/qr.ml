@@ -85,30 +85,16 @@ let print_mat label x =
       Array.iter (printf "  %5.2f") xi;
       print_newline ()) x
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+let a =
+  [|
+    [| 3.; 5.; 0.; 0.; 1.|];
+    [| 0.; 2.; 3.; 0.; 9.|];
+    [|-1.; 1.; 4.; 2.; 3.|];
+    [| 6.; 0.;-9.; 1.; 0.|];
+    [|-8.; 3.; 1.;-5.; 2.|];
+  |]
 
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
-let () =
-  let a =
-    [|
-      [| 3.; 5.; 0.; 0.; 1.|];
-      [| 0.; 2.; 3.; 0.; 9.|];
-      [|-1.; 1.; 4.; 2.; 3.|];
-      [| 6.; 0.;-9.; 1.; 0.|];
-      [|-8.; 3.; 1.;-5.; 2.|];
-    |] in
-  let t1 = Unix.times () in
-  for i = 1 to 300000 do
-    let q = orthonormalize a in
-    let r = calc_r a q in
-    ignore (gemm q r);
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+let main () =
+  let q = orthonormalize a in
+  let r = calc_r a q in
+  gemm q r

@@ -79,22 +79,4 @@ let main () =
     { re=(320.); im=0. };
     { re=(-300.); im=0.};
   |] in
-  roots cs |> ignore
-
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let () =
-  let t1 = Unix.times () in
-  for i = 1 to 100000 do
-    main ();
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  roots cs

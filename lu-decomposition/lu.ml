@@ -81,14 +81,6 @@ let print_mat label x =
       Array.iter (printf "  %10g") xi;
       print_newline ()) x
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
 let main () =
   let a =
     [|
@@ -116,13 +108,3 @@ let main () =
   (* print_mat "matrix U" u; *)
   (* print_mat "matrix P" p; *)
   (* print_mat "matrix P * L * U" a' *)
-
-let () =
-    let t1 = Unix.times () in
-  for i = 1 to 150000 do
-    main ();
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
