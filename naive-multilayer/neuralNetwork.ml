@@ -242,7 +242,7 @@ let main samples =
     make_layer actv_tanh actv_tanh' input_dim hidden1_dim;
     make_layer actv_tanh actv_tanh' hidden1_dim hidden2_dim;
     make_layer actv_softmax actv_softmax' hidden2_dim output_dim; ] in
-  for i = 1 to 10 do
+  for i = 1 to 1 do
     Array.iter (fun (x, t) ->
         (* check_gradient nnet x t; *)
         train ~eta:0.01 nnet x t) samples;
