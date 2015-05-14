@@ -251,12 +251,11 @@ let main samples =
     (* then printf "Loop #%d: Error = %g@." i (evaluate nnet samples) *)
   done
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+open Core.Std
+open Core_bench.Std
 
 let () =
-  let t1 = Unix.times () in
-  main Dataset.samples;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Command.run (Bench.make_command [
+    Bench.Test.create ~name: __FILE__
+      (fun () -> main Dataset.samples |> ignore);
+    ])

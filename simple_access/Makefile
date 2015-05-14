@@ -1,16 +1,10 @@
 include ../Makefile.shared
 
-SOURCES=a.ml b.ml
+SOURCES= a.ml
 
-test: vanilla my
-	./vanilla
-	./my
-
-my: $(SOURCES)
-	$(mycaml) -o $@ -dclambda unix.cmxa a.ml b.ml  2> $@.clam
-
-vanilla: $(SOURCES)
-	$(vanilla) -o $@ -dclambda unix.cmxa a.ml b.ml  2> $@.clam
+test: $(SOURCES)
+	$(OCAMLOPT) -o $@ $^
 
 clean:
-	rm -f *.cm? *.o *.annot my vanilla
+	rm -f ./test
+	rm -f ./*.cm?

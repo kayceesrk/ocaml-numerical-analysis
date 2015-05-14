@@ -78,23 +78,114 @@ let main () =
     { re=(-59.); im=0. };
     { re=(320.); im=0. };
     { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
+    { re=2.; im=0. };
+    { re=5.; im=0. };
+    { re=(-26.); im=0. };
+    { re=(-59.); im=0. };
+    { re=(320.); im=0. };
+    { re=(-300.); im=0.};
   |] in
-  roots cs |> ignore
+  roots cs
 
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+(* let c = Gc.get () *)
+(* let () = Gc.set *)
+(*     { c with Gc.minor_heap_size = 32000000; *)
+(*              Gc.space_overhead = max_int } *)
+open Core.Std
+open Core_bench.Std
 
 let () =
-  let t1 = Unix.times () in
-  for i = 1 to 100000 do
-    main ();
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Command.run (Bench.make_command [
+    Bench.Test.create ~name: __FILE__
+      (fun () -> main ())
+    ])

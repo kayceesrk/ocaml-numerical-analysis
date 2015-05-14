@@ -50,14 +50,10 @@ let levinson r =
 let print_ar_coeffs label data order =
   let r = autocorr data (order + 1) in
   let (ar, sigma2) = levinson r in
-  ()
-  (* let ar_str = Array.to_list ar *)
-  (*              |> List.map (sprintf "%g") *)
-  (*              |> String.concat "; " in *)
-  (* printf "%s:@\n  @[AR = [|%s|]@\nsigma^2 = %g@]@." label ar_str sigma2 *)
+  Array.to_list ar
+  |> List.map (sprintf "%g")
+  |> String.concat "; "
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
 
 let c = Gc.get ()
 let () = Gc.set
@@ -65,19 +61,18 @@ let () = Gc.set
              Gc.space_overhead = max_int }
 
 let main () =
-  let order = 20 in (* AR order *)
+  let order = 100 in (* AR order *)
   print_ar_coeffs "Sound /a/" Dataset.a order;
   print_ar_coeffs "Sound /i/" Dataset.i order;
   print_ar_coeffs "Sound /u/" Dataset.u order;
   print_ar_coeffs "Sound /e/" Dataset.e order;
   print_ar_coeffs "Sound /o/" Dataset.o order
 
+open Core.Std
+open Core_bench.Std
+
 let () =
-  let t1 = Unix.times () in
-  for i = 1 to 1000 do
-    main () |> ignore;
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Command.run (Bench.make_command [
+    Bench.Test.create ~name: __FILE__
+      (fun () -> main ());
+    ])

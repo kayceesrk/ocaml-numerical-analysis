@@ -1,15 +1,10 @@
 include ../Makefile.shared
 
-test: ./my ./vanilla
-	./my
-	./vanilla
+SOURCES= fft.ml
 
-my: fft.ml
-	$(mycaml) -o $@ -dclambda unix.cmxa fft.ml 2> $@.clam
-
-vanilla: fft.ml
-	$(vanilla) -o $@ -dclambda unix.cmxa fft.ml 2> $@.clam
+test: $(SOURCES)
+	$(OCAMLOPT) -o $@ $^
 
 clean:
-	rm ./my ./vanilla -f
-	rm ./*.cm?
+	rm -f ./test
+	rm -f ./*.cm?

@@ -17,6 +17,7 @@ module Array = struct
 
   (** [swap x i j] swaps [x.(i)] and [x.(j)]. *)
   let swap x i j =
+    printf "i=%d, j=%d@." i j;
     let tmp = x.(i) in
     x.(i) <- x.(j);
     x.(j) <- tmp
@@ -84,21 +85,26 @@ let print_mat label x =
 let gather t =
   t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
 
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
+(* let c = Gc.get () *)
+(* let () = Gc.set *)
+(*     { c with Gc.minor_heap_size = 32000000; *)
+(*              Gc.space_overhead = max_int } *)
+
+let a =
+  [|
+    [| 0.; 2.; 3.; 0.; 9.;  0.; 2.; 3.; 0.|];
+    [|-1.; 1.; 4.; 2.; 3.; -1.; 1.; 4.; 2.|];
+    [| 6.; 0.;-9.; 1.; 0.;  6.; 0.;-9.; 1.|];
+    [| 3.; 5.; 0.; 0.; 1.;  3.; 5.; 0.; 0.|];
+    [|-8.; 3.; 1.;-5.; 2.; -8.; 3.; 1.;-5.|];
+    [|-2.;-1.;-1.; 4.; 6.; -2.;-1.;-1.; 4.|];
+    [| 0.; 2.; 3.; 0.; 9.;  0.; 2.; 3.; 0.|];
+    [|-1.; 1.; 4.; 2.; 3.; -1.; 1.; 4.; 2.|];
+    [| 6.; 0.;-9.; 1.; 0.;  6.; 0.;-9.; 1.|];
+  |]
+
 
 let main () =
-  let a =
-    [|
-      [| 0.; 2.; 3.; 0.; 9.|];
-      [|-1.; 1.; 4.; 2.; 3.|];
-      [| 6.; 0.;-9.; 1.; 0.|];
-      [| 3.; 5.; 0.; 0.; 1.|];
-      [|-8.; 3.; 1.;-5.; 2.|];
-      [|-2.;-1.;-1.; 4.; 6.|]
-    |] in
     let p, lu = lup a in
     let m, n = Array.matrix_size lu in
     let r = min m n in
@@ -117,12 +123,11 @@ let main () =
   (* print_mat "matrix P" p; *)
   (* print_mat "matrix P * L * U" a' *)
 
+open Core.Std
+open Core_bench.Std
+
 let () =
-    let t1 = Unix.times () in
-  for i = 1 to 150000 do
-    main ();
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Command.run (Bench.make_command [
+    Bench.Test.create ~name: __FILE__
+      (fun () -> main ());
+    ])

@@ -1,30 +1,32 @@
 include Makefile.shared
 
-TESTS = naive-multilayer durand-kerner-aberth fft k-means \
-	levinson-durbin lu-decomposition qr-decomposition \
-#	rnd_access simple_access float_access
+TESTS = naive-multilayer durand-kerner-aberth fft  \
+	levinson-durbin \
+	rnd_access simple_access \
+#	lu-decomposition k-means
 
-RESULTS=$(foreach ITEM, $(TESTS), $(ITEM)/my.result $(ITEM)/vanilla.result)
+RESULTS=$(foreach ITEM, $(TESTS), $(ITEM)/test.result)
 
-all: $(foreach ITEM, $(TESTS), $(ITEM)/my $(ITEM)/vanilla)
+all: $(foreach ITEM, $(TESTS), $(ITEM)/test)
+
+test:
+	echo `which ocamlopt`
+	make do_test
 
 .PHONY: do_test clean clean_result average
 
 do_test: $(RESULTS)
 
-%/my: %/*.ml
-	cd $(dir $@) && make my
-
-%/vanilla: %/*.ml
-	cd $(dir $@) && make vanilla
+%/test: %/*.ml
+	cd $(dir $@) && make test
 
 %.result: % FORCE
-	for i in `seq 1 99 `; do $(basename ./$@) >> ./$@; done
+	cd $(dir $@) && ./test -save -quota 1000 time gc alloc samples
 
 FORCE:
 
 clean:
-	rm -f */my */vanilla */*.cm? */*.o */*.clam
+	rm -f */test */*.cm? */*.o */*.clam
 
 clean_result:
 	find -name "*.result" -exec rm {} \;

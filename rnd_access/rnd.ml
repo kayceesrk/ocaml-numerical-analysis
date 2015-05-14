@@ -16,11 +16,11 @@ let main () =
     if get arr i then ignore (get a 1) else ignore (get b 1)
   done
 
+open Core.Std
+open Core_bench.Std
+
 let () =
-  let t1 = Unix.times () in
-  for i = 0 to 1000 do
-    main ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Command.run (Bench.make_command [
+    Bench.Test.create ~name: __FILE__
+      (fun () -> main ());
+    ])

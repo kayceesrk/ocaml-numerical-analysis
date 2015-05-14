@@ -54,28 +54,24 @@ let ifft x =
   let normalize z = { re = c *. z.re; im = ~-. c *. z.im } in
   fft (Array.map normalize x)
 
+let arr = Array.init (1024 * 128) (fun i -> float_of_int (i + 1))
+
 let c = Gc.get ()
 let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
+    { c with Gc.minor_heap_size = 3200000 ;
+             Gc.space_overhead = 80 * 40}
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
+let main arr =
+  arr
+  |> Array.map (fun x -> { re = x; im = 0.0 })
+  |> fft
+  |> ifft
 
-let main () =
-  let x = [|
-    1.0; 2.0; 3.0; 4.0; 5.0; 6.0; 7.0; 8.0;
-    9.0; 10.0; 11.0; 12.0; 13.0; 14.0; 15.0; 16.0;
-  |]
-    |> Array.map (fun x -> { re = x; im = 0.0 }) in
-  fft x |> ifft |> ignore
+(* open Core.Std *)
+open Core_bench.Std
 
 let () =
-  let t1 = Unix.times () in
-  for i = 1 to 200000 do
-    main ();
-    Gc.minor ()
-  done;
-  let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Core.Command.run (Bench.make_command [
+      Bench.Test.create ~name: __FILE__
+        (fun () -> main arr);
+    ])

@@ -1,5 +1,3 @@
-flag = -w -warn-error -unsafe -inline 1000000
+FLAG= -g -w -warn-error -unsafe -inline 1000000
 
-mycaml = ~/git_ocaml/ocamlopt -nostdlib -I ~/git_ocaml/stdlib -I ~/git_ocaml/otherlibs/unix $(flag)
-vanilla = ~/vcaml/bin/ocamlopt -nostdlib -I ~/vcaml/lib/ocaml $(flag)
-time = time -f "%e"
+OCAMLOPT= ocamlfind ocamlopt -package core,core_bench -linkpkg -thread $(FLAG)
