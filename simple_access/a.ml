@@ -6,4 +6,4 @@ let sum a =
   get a 7 +. get a 8 +. get a 9
 
 let arr () =
-  Array.init 20000 (fun i -> Array.make 9 (float_of_int i))
+  Array.init 20000000 (fun i -> Array.make 9 (float_of_int i))

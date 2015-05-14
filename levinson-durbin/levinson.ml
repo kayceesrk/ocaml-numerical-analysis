@@ -65,7 +65,7 @@ let () = Gc.set
              Gc.space_overhead = max_int }
 
 let main () =
-  let order = 20 in (* AR order *)
+  let order = 10000 in (* AR order *)
   print_ar_coeffs "Sound /a/" Dataset.a order;
   print_ar_coeffs "Sound /i/" Dataset.i order;
   print_ar_coeffs "Sound /u/" Dataset.u order;
@@ -74,10 +74,7 @@ let main () =
 
 let () =
   let t1 = Unix.times () in
-  for i = 1 to 1000 do
-    main () |> ignore;
-    Gc.minor ()
-  done;
+  main () |> ignore;
   let t2 = Unix.times () in
   gather t2 -. gather t1
   |> Format.printf "%f\n"

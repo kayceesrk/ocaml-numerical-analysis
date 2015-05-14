@@ -78,13 +78,13 @@ let gather t =
 let c = Gc.get ()
 let () = Gc.set
     { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
+             Gc.space_overhead = 80 * 40 }
 
 let main () =
   let k = Dataset.n_classes in
   let xs = Array.map fst Dataset.samples in
   let (means, cs) = kmeans k xs in
-  ()
+  (means, cs)
   (* printf "mean vectors:@\n"; *)
   (* Array.iteri (fun i mi -> *)
   (*     printf "[%d]" i; *)
@@ -95,10 +95,7 @@ let main () =
 
 let () =
   let t1 = Unix.times () in
-  for i = 1 to 3000 do
-    main () |> ignore;
-    Gc.minor ()
-  done;
+  main ();
   let t2 = Unix.times () in
   gather t2 -. gather t1
   |> Format.printf "%f\n"

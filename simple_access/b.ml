@@ -12,7 +12,6 @@ let main () =
     Gc.minor
   done
 
-
 let () =
   Gc.minor ();
   let control = Gc.get () in
@@ -21,9 +20,7 @@ let () =
       with Gc.minor_heap_size = 320000;
            Gc.space_overhead = max_int };
   let t1 = Unix.times () in
-  for i = 1 to 20000 do
-    main ();
-  done;
+  main ();
   let t2 = Unix.times () in
   gather t2 -. gather t1
   |> Format.printf "%f\n"

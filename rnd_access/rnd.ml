@@ -6,7 +6,7 @@ let gather t =
 
 let arr =
   Random.self_init ();
-  Array.init 200000 (fun _ -> Random.bool ())
+  Array.init 200000000 (fun _ -> Random.bool ())
 
 let a = [|1|]
 let b = [|1.0|]
@@ -18,9 +18,7 @@ let main () =
 
 let () =
   let t1 = Unix.times () in
-  for i = 0 to 1000 do
-    main ()
-  done;
+  main ();
   let t2 = Unix.times () in
   gather t2 -. gather t1
   |> Format.printf "%f\n"
