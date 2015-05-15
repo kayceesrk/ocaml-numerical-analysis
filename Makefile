@@ -21,7 +21,7 @@ do_test: $(RESULTS)
 	cd $(dir $@) && make vanilla
 
 %.result: %
-	for i in `seq 1 9`; do $(basename ./$@) >> ./$@; done
+	for i in `seq 100`; do $(basename ./$@) >> ./$@; done
 
 clean:
 	rm -f */my */vanilla */*.cm? */*.o */*.clam

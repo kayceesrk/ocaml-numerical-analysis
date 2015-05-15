@@ -5,27 +5,25 @@
 
 open Format
 
-module Array = struct
-  include Array
 
-  let iter2 f x y = iteri (fun i xi -> f xi y.(i)) x
+let iter2 f x y = Array.iteri (fun i xi -> f xi y.(i)) x
 
-  let foldi f init x =
-    snd (fold_left (fun (i, acc) xi -> (i+1, f i acc xi)) (0, init) x)
+let foldi f init x =
+  snd (Array.fold_left (fun (i, acc) xi -> (i+1, f i acc xi)) (0, init) x)
 
-  let min f x =
-    foldi
-      (fun i (i0, v0) xi -> let v = f xi in if v0 > v then (i, v) else (i0, v0))
-      (-1, max_float) x
+let min f x =
+  foldi
+    (fun i (i0, v0) xi -> let v = f xi in if v0 > v then (i, v) else (i0, v0))
+    (-1, max_float) x
 
-  let fold_left2 f init x y = foldi (fun i acc xi -> f acc xi y.(i)) init x
+let fold_left2 f init x y = foldi (fun i acc xi -> f acc xi y.(i)) init x
 
-  let map2_sum f = fold_left2 (fun acc xi yi -> acc +. f xi yi) 0.0
-end
+let map2_sum f = fold_left2 (fun acc xi yi -> acc +. f xi yi) 0.0
+
 
 (** [distance x y] returns the square of the L2 norm of the distance between
     vectors [x] and [y], i.e., [||x - y||^2]. *)
-let distance = Array.map2_sum (fun xi yi -> let diff = xi -. yi in diff *. diff)
+let distance = map2_sum (fun xi yi -> let diff = xi -. yi in diff *. diff)
 
 (** [kmeans k xs] performs [k]-means clustering algorithm for data set [xs].
     @return [(means, cs)] where [means] is an array of mean vectors, and [cs] is
@@ -43,12 +41,12 @@ let kmeans k xs =
       let c = 1.0 /. float !n in
       Array.map (( *. ) c) sum
     in
-    Array.iter2 sum_up cs xs;
+    iter2 sum_up cs xs;
     Array.map normalize z
   in
   let update means cs = (* Update class assignment *)
-    Array.foldi (fun i updated xi ->
-      let ci', _ = Array.min (distance xi) means in
+    foldi (fun i updated xi ->
+      let ci', _ = min (distance xi) means in
       if cs.(i) <> ci' then (cs.(i) <- ci' ; true) else updated)
     false xs
   in
@@ -64,7 +62,7 @@ let kmeans k xs =
 let show_result k xs cs =
   let ys = Array.map snd Dataset.samples in (* answers *)
   let tbl = Array.make_matrix k k 0 in
-  Array.iter2 (fun ci yi -> tbl.(ci).(yi) <- succ tbl.(ci).(yi)) cs ys;
+  iter2 (fun ci yi -> tbl.(ci).(yi) <- succ tbl.(ci).(yi)) cs ys;
   for prd = 0 to k - 1 do
     for ans = 0 to k - 1 do
       printf "Prediction = %d, Answer = %d: %d points@\n"
@@ -97,5 +95,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)

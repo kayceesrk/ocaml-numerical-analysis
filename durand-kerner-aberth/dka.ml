@@ -6,23 +6,19 @@
 open Format
 open Complex
 
-module Array = struct
-  include Array
+let fold_lefti f init x =
+  let acc = ref init in
+  for i = 0 to Array.length x - 1 do acc := f i !acc x.(i) done;
+  !acc
 
-  let fold_lefti f init x =
-    let acc = ref init in
-    for i = 0 to length x - 1 do acc := f i !acc x.(i) done;
-    !acc
-
-  let for_all2 f x y =
-    assert(length x = length y);
-    let rec aux i =
-      if i < 0 then true
-      else if f x.(i) y.(i) then aux (i - 1)
-      else false
-    in
-    aux (length x - 1)
-end
+let for_all2 f x y =
+  assert(Array.length x = Array.length y);
+  let rec aux i =
+    if i < 0 then true
+    else if f x.(i) y.(i) then aux (i - 1)
+    else false
+  in
+  aux (Array.length x - 1)
 
 let ( +! ) = add
 let ( -! ) = sub
@@ -58,12 +54,12 @@ let roots ?(epsilon = 1e-6) ?init cs =
   let cn = cs.(0) in (* c(n) *)
   let rec update_z zs = (* update z(0), ..., z(n-1) until they converge *)
     let update_zi zs i zi = (* update z(i) *)
-      let deno = Array.fold_lefti
+      let deno = fold_lefti
           (fun j acc zj -> if i = j then acc else acc *! (zi -! zj)) cn zs in
       zi -! calc_poly zi /! deno
     in
     let zs' = Array.mapi (update_zi zs) zs in (* new z(0),...,z(n-1) *)
-    if Array.for_all2 (fun zi zi' -> norm2 (zi -! zi') < epsilon) zs zs'
+    if for_all2 (fun zi zi' -> norm2 (zi -! zi') < epsilon) zs zs'
     then zs' (* converged! *)
     else update_z zs'
   in
@@ -185,5 +181,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)
