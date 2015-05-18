@@ -95,4 +95,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)
+  Format.printf "%f %d %d\n" (gather t2 -. gather t1) (Must.get_gen ()) (Must.get_mono ())
