@@ -59,7 +59,7 @@ let gather t =
 let c = Gc.get ()
 let () = Gc.set
     { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
+             Gc.space_overhead = 80 }
 
 let main () =
   let order = 10000 in (* AR order *)
@@ -73,4 +73,4 @@ let () =
   let t1 = Unix.times () in
   main () |> ignore;
   let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)
+  Format.printf "%f %d\n" (gather t2 -. gather t1) (Must.get ())

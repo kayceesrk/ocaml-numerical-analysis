@@ -5,10 +5,10 @@ test: ./my ./vanilla
 	./vanilla
 
 my: fft.ml
-	$(mycaml) -o $@ -dclambda unix.cmxa fft.ml 2> $@.clam
+	$(mycaml) -o $@ unix.cmxa fft.ml
 
 vanilla: fft.ml
-	$(vanilla) -o $@ -dclambda unix.cmxa fft.ml 2> $@.clam
+	$(vanilla) -o $@ unix.cmxa fft.ml
 
 clean:
 	rm ./my ./vanilla -f
