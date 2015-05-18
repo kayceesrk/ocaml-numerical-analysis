@@ -353,5 +353,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)

@@ -9,29 +9,27 @@ open Format
  * Utility functions for array
  * ================================================================= *)
 
-module Array = struct
-  include Array
 
-  let init_matrix m n f = init m (fun i -> init n (f i))
+let init_matrix m n f = Array.init m (fun i -> Array.init n (f i))
 
-  let matrix_size a =
-    let m = length a in
-    let n = if m = 0 then 0 else length a.(0) in
-    (m, n)
+let matrix_size a =
+  let m = Array.length a in
+  let n = if m = 0 then 0 else Array.length a.(0) in
+  (m, n)
 
-  let map2 f x y = mapi (fun i xi -> f xi y.(i)) x
+let map2 f x y = Array.mapi (fun i xi -> f xi y.(i)) x
 
-  let iter2 f x y = iteri (fun i xi -> f xi y.(i)) x
-  let iteri2 f x y = iteri (fun i xi -> f i xi y.(i)) x
+let iter2 f x y =  Array.iteri (fun i xi -> f xi y.(i)) x
+let iteri2 f x y = Array.iteri (fun i xi -> f i xi y.(i)) x
 
-  let fold_left2 f init x y =
-    let acc = ref init in
-    for i = 0 to length x - 1 do acc := f !acc x.(i) y.(i) done;
-    !acc
+let fold_left2 f init x y =
+  let acc = ref init in
+  for i = 0 to Array.length x - 1 do acc := f !acc x.(i) y.(i) done;
+  !acc
 
-  let map_sum f = fold_left (fun acc xi -> acc +. f xi) 0.0
-  let map2_sum f = fold_left2 (fun acc xi yi -> acc +. f xi yi) 0.0
-end
+let map_sum f =  Array.fold_left (fun acc xi -> acc +. f xi) 0.0
+let map2_sum f = fold_left2 (fun acc xi yi -> acc +. f xi yi) 0.0
+
 
 let c = Gc.get ()
 let () = Gc.set
@@ -43,7 +41,7 @@ let () = Gc.set
  * ================================================================= *)
 
 (** Dot product of two vectors *)
-let dot = Array.map2_sum ( *. )
+let dot = map2_sum ( *. )
 
 (** Execute [y := alpha * x + y] where [alpha] is a scalar, [x] and [y] are
     vectors. *)
@@ -53,14 +51,14 @@ let axpy ~alpha x y =
 
 (** [gemv a x y] computes [a * x + y] where [a] is a matrix, and [x] and [y] are
     vectors. *)
-let gemv a x y = Array.map2 (fun ai yi -> dot ai x +. yi) a y
+let gemv a x y = map2 (fun ai yi -> dot ai x +. yi) a y
 
 (** [gemv_t a x] computes [a^T * x] where [a] is a matrix and [x] is a vector.
 *)
 let gemv_t a x =
-  let (_, n) = Array.matrix_size a in
+  let (_, n) = matrix_size a in
   let y = Array.make n 0.0 in
-  Array.iter2 (fun ai xi -> axpy ~alpha:xi ai y) a x;
+  iter2 (fun ai xi -> axpy ~alpha:xi ai y) a x;
   y
 
 (** [ger x y] computes outer product [x y^T] of vectors [x] and [y]. *)
@@ -86,10 +84,10 @@ let forwardprop lyrs x0 =
     x0 lyrs
 
 (** An error function (cross-entropy) *)
-let error y t = ~-. (Array.map2_sum (fun ti yi -> ti *. log yi) t y)
+let error y t = ~-. (map2_sum (fun ti yi -> ti *. log yi) t y)
 
 (** The derivative of an error function *)
-let error' = Array.map2 (fun yi ti -> ~-. ti /. yi)
+let error' = map2 (fun yi ti -> ~-. ti /. yi)
 
 (** Error backpropagation *)
 let backprop lyrs x0 t =
@@ -117,7 +115,7 @@ let train ~eta lyrs x0 t =
     (fun (x, delta) lyr ->
        let dw = ger delta x in
        let db = delta in
-       Array.iter2 (axpy ~alpha) dw lyr.weight;
+       iter2 (axpy ~alpha) dw lyr.weight;
        axpy ~alpha db lyr.bias)
     res lyrs
 
@@ -150,9 +148,9 @@ let approx_gradient ?(epsilon = 1e-4) lyrs x0 t =
     let e_n = calc_error (lyr0_eps (~-. epsilon)) in
     (e_p -. e_n) /. (2.0 *. epsilon)
   in
-  let (m, n) = Array.matrix_size lyr0.weight in
+  let (m, n) = matrix_size lyr0.weight in
   let db = Array.init m (fun i -> calc_grad (lyr0_bias_eps i)) in
-  let dw = Array.init_matrix m n (fun i j -> calc_grad (lyr0_weight_eps i j)) in
+  let dw = init_matrix m n (fun i j -> calc_grad (lyr0_weight_eps i j)) in
   (db, dw)
 
 let eq_significant_digits ?(epsilon = 1e-9) ?(digits = 1e-3) x y =
@@ -179,9 +177,9 @@ let check_gradient lyrs x0 t =
   let dw = ger delta x in
   let db = delta in
   let (db', dw') = approx_gradient lyrs x0 t in
-  Array.iteri2 (fun i -> warn (sprintf "dE/db[%d]" i)) db db';
-  Array.iteri2 (fun i ->
-      Array.iteri2 (fun j ->
+  iteri2 (fun i -> warn (sprintf "dE/db[%d]" i)) db db';
+  iteri2 (fun i ->
+      iteri2 (fun j ->
           warn (sprintf "dE/dw[%d,%d]" i j))) dw dw'
 
 (* ================================================================= *
@@ -194,18 +192,18 @@ let actv_tanh = Array.map tanh
 (** The derivative of the hyperbolic tangent *)
 let actv_tanh' z =
   let n = Array.length z in
-  Array.init_matrix n n (fun i j -> if i=j then 1.0 -. z.(i) *. z.(i) else 0.0)
+  init_matrix n n (fun i j -> if i=j then 1.0 -. z.(i) *. z.(i) else 0.0)
 
 (** The softmax function (used at the output layer for classification) *)
 let actv_softmax x =
   let y = Array.map exp x in
-  let c = 1.0 /. Array.map_sum (fun yi -> yi) y in
+  let c = 1.0 /. map_sum (fun yi -> yi) y in
   Array.map (( *. ) c) y
 
 (** The derivative of the softmax function *)
 let actv_softmax' z =
   let n = Array.length z in
-  Array.init_matrix n n
+  init_matrix n n
     (fun i j -> if i = j then (1.0 -. z.(i)) *. z.(i) else ~-. (z.(i) *. z.(j)))
 
 (** A linear function (used at the output layer for regression) *)
@@ -214,7 +212,7 @@ let actv_linear x = x
 (** The derivative of a linear function *)
 let actv_linear z =
   let n = Array.length z in
-  Array.init_matrix n n (fun i j -> if i = j then 1.0 else 0.0)
+  init_matrix n n (fun i j -> if i = j then 1.0 else 0.0)
 
 (* ================================================================= *
  * Main routine
@@ -224,12 +222,12 @@ let actv_linear z =
 let make_layer actv_f actv_f' dim1 dim2 =
   let rand () = Random.float 2.0 -. 1.0 in
   { actv_f; actv_f';
-    weight = Array.init_matrix dim2 dim1 (fun _ _ -> rand ());
+    weight = init_matrix dim2 dim1 (fun _ _ -> rand ());
     bias = Array.init dim2 (fun _ -> rand ()); }
 
 (** Evaluate an error *)
 let evaluate lyrs samples =
-  Array.map_sum (fun (x, t) -> error (forwardprop lyrs x) t) samples
+  map_sum (fun (x, t) -> error (forwardprop lyrs x) t) samples
 
 let main samples =
   let (input_dim, output_dim) =
@@ -258,5 +256,4 @@ let () =
   let t1 = Unix.times () in
   main Dataset.samples;
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)

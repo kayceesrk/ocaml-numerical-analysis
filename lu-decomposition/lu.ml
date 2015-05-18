@@ -5,22 +5,20 @@
 
 open Format
 
-module Array = struct
-  include Array
 
-  let init_matrix m n f = init m (fun i -> init n (f i))
+let init_matrix m n f = Array.init m (fun i -> Array.init n (f i))
 
-  let matrix_size a =
-    let m = length a in
-    let n = if m = 0 then 0 else length a.(0) in
-    (m, n)
+let matrix_size a =
+  let m = Array.length a in
+  let n = if m = 0 then 0 else Array.length a.(0) in
+  (m, n)
 
-  (** [swap x i j] swaps [x.(i)] and [x.(j)]. *)
-  let swap x i j =
-    let tmp = x.(i) in
-    x.(i) <- x.(j);
-    x.(j) <- tmp
-end
+(** [swap x i j] swaps [x.(i)] and [x.(j)]. *)
+let swap x i j =
+  let tmp = x.(i) in
+  x.(i) <- x.(j);
+  x.(j) <- tmp
+
 
 (** [foldi f init i j] is [f (... (f (f init i) (i+1)) ...) j]. *)
 let foldi f init i j =
@@ -45,7 +43,7 @@ let maxi f i j =
 *)
 let lup a0 =
   let a = Array.copy a0 in
-  let m, n = Array.matrix_size a in
+  let m, n = matrix_size a in
   let r = min m n in
   let p = Array.init m (fun i -> i) in (* permutation indices *)
   let lu = Array.make_matrix m n 0.0 in
@@ -68,10 +66,10 @@ let lup a0 =
 
 (** Matrix multiplication *)
 let gemm x y =
-  let m, k = Array.matrix_size x in
-  let k', n = Array.matrix_size y in
+  let m, k = matrix_size x in
+  let k', n = matrix_size y in
   assert(k = k');
-  Array.init_matrix m n
+  init_matrix m n
     (fun i j -> sumi (fun l -> x.(i).(l) *. y.(l).(j)) 0 (k - 1))
 
 let print_mat label x =
@@ -2817,16 +2815,16 @@ let a =
 
 let main () =
   let p, lu = lup a in
-  let m, n = Array.matrix_size lu in
+  let m, n = matrix_size lu in
   let r = min m n in
   let l = (* a lower trapezoidal matrix *)
-    Array.init_matrix m r
+    init_matrix m r
       (fun i j -> if i > j then lu.(i).(j) else if i = j then 1.0 else 0.0) in
   let u = (* an upper trapezoidal matrix *)
-    Array.init_matrix r n
+    init_matrix r n
       (fun i j -> if i <= j then lu.(i).(j) else 0.0) in
   let p = (* a permutation matrix *)
-    Array.init_matrix m m (fun i j -> if i = p.(j) then 1.0 else 0.0) in
+    init_matrix m m (fun i j -> if i = p.(j) then 1.0 else 0.0) in
   let a' = gemm p (gemm l u) in (* ['a] is equal to [a]. *)
   (* print_mat "matrix A" a; *)
   (* print_mat "matrix L" l; *)
@@ -2842,5 +2840,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f \n" (gather t2 -. gather t1)

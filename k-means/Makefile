@@ -7,10 +7,10 @@ test: vanilla my
 	./my
 
 my: $(SOURCES)
-	$(mycaml) -o $@ unix.cmxa $(SOURCES)
+	$(mycaml) -dclambda -o $@ unix.cmxa $(SOURCES) 2> ./my.clam
 
 vanilla: $(SOURCES)
-	$(vanilla) -o $@ unix.cmxa $(SOURCES)
+	$(vanilla) -dclambda -o $@ unix.cmxa $(SOURCES) 2> ./vanilla.clam
 
 clean:
 	rm -f *.cm? *.o *.annot my vanilla

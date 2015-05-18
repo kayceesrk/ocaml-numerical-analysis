@@ -5,15 +5,12 @@
 
 open Format
 
-module Array = struct
-  include Array
+(** [mapi_sum f [|x1; x2; ...; xn|]] is [f x1 +. f x2 +. ... +. f xn]. *)
+let mapi_sum f x =
+  let acc = ref 0.0 in
+  for i = 0 to Array.length x - 1 do acc := !acc +. f i x.(i) done;
+  !acc
 
-  (** [mapi_sum f [|x1; x2; ...; xn|]] is [f x1 +. f x2 +. ... +. f xn]. *)
-  let mapi_sum f x =
-    let acc = ref 0.0 in
-    for i = 0 to length x - 1 do acc := !acc +. f i x.(i) done;
-    !acc
-end
 
 (** [autocorr x tau] computes autocorrelation [[|r(0); r(1); ...; [r(tau)]|]].
 *)
@@ -38,7 +35,7 @@ let levinson r =
     if m' = n then (ar, sigma2)
     else begin
       let ar' = Array.make (m+1) 0.0 in
-      ar'.(m) <- (r.(m+1) -. Array.mapi_sum (fun i ai -> ai *. r.(m-i)) ar)
+      ar'.(m) <- (r.(m+1) -. mapi_sum (fun i ai -> ai *. r.(m-i)) ar)
                  /. sigma2;
       for i = 0 to m-1 do ar'.(i) <- ar.(i) -. ar'.(m) *. ar.(m-1-i) done;
       let sigma2' = sigma2 *. (1.0 -. ar'.(m) *. ar'.(m)) in
@@ -50,7 +47,7 @@ let levinson r =
 let print_ar_coeffs label data order =
   let r = autocorr data (order + 1) in
   let (ar, sigma2) = levinson r in
-  ()
+  (ar, sigma2)
   (* let ar_str = Array.to_list ar *)
   (*              |> List.map (sprintf "%g") *)
   (*              |> String.concat "; " in *)
@@ -76,5 +73,4 @@ let () =
   let t1 = Unix.times () in
   main () |> ignore;
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)

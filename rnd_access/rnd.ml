@@ -6,7 +6,10 @@ let gather t =
 
 let arr =
   Random.self_init ();
-  Array.init 200000000 (fun _ -> Random.bool ())
+  let len =
+    if Array.length Sys.argv = 1
+    then 200000000 else int_of_string Sys.argv.(1) in
+  Array.init len (fun _ -> Random.bool ())
 
 let a = [|1|]
 let b = [|1.0|]
@@ -20,5 +23,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f \n" (gather t2 -. gather t1)

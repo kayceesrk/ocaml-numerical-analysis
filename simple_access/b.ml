@@ -9,7 +9,6 @@ let main () =
   let r = ref 0. in
   for i = 1 to Array.length arr do
     r := !r +. A.sum (A.get arr i);
-    Gc.minor
   done
 
 let () =
@@ -22,5 +21,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)

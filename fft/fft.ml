@@ -57,12 +57,16 @@ let ifft x =
 let c = Gc.get ()
 let () = Gc.set
     { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = 80 * 120}
+             Gc.space_overhead = 80 }
 
 let gather t =
   t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
 
-let arr = Array.init (1024 * 1024) (fun i -> { re = float_of_int i; im = 0.0})
+let arr =
+  let len =
+    if Array.length Sys.argv = 1
+    then (1024 * 1024) else int_of_string Sys.argv.(1) in
+  Array.init len (fun i -> { re = float_of_int i; im = 0.0})
 
 let main () =
   arr
@@ -73,5 +77,4 @@ let () =
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in
-  gather t2 -. gather t1
-  |> Format.printf "%f\n"
+  Format.printf "%f\n" (gather t2 -. gather t1)

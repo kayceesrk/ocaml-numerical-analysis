@@ -6,4 +6,8 @@ let sum a =
   get a 7 +. get a 8 +. get a 9
 
 let arr () =
-  Array.init 20000000 (fun i -> Array.make 9 (float_of_int i))
+  let len =
+    if Array.length Sys.argv = 1
+    then 20000000
+    else int_of_string Sys.argv.(1) in
+  Array.init len (fun i -> Array.make 9 (float_of_int i))
