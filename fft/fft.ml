@@ -57,7 +57,7 @@ let ifft x =
 let c = Gc.get ()
 let () = Gc.set
     { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = 80 }
+             Gc.space_overhead = 80 * 20 }
 
 let gather t =
   t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
@@ -74,6 +74,7 @@ let main () =
   |> ifft
 
 let () =
+  Gc.major ();
   let t1 = Unix.times () in
   main ();
   let t2 = Unix.times () in

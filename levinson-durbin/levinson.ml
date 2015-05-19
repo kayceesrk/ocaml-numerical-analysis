@@ -61,8 +61,13 @@ let () = Gc.set
     { c with Gc.minor_heap_size = 32000000;
              Gc.space_overhead = max_int }
 
+let len =
+  if Array.length Sys.argv = 1
+  then 10000
+  else Sys.argv.(1) |> int_of_string
+
 let main () =
-  let order = 10000 in (* AR order *)
+  let order = len in (* AR order *)
   print_ar_coeffs "Sound /a/" Dataset.a order;
   print_ar_coeffs "Sound /i/" Dataset.i order;
   print_ar_coeffs "Sound /u/" Dataset.u order;
