@@ -1,7 +1,8 @@
 flag = -w -warn-error -unsafe -inline 10000000
 
 mycaml = ~/git_ocaml/ocamlopt -nostdlib \
-       -I ~/git_ocaml/stdlib -I ~/git_ocaml/otherlibs/unix -I ../ ../must.cmx \
+       -I ~/git_ocaml/stdlib -I ~/git_ocaml/otherlibs/unix -I ../ ../must.ml \
        $(flag)
-vanilla = ~/vanilla/ocamlopt.opt -nostdlib -I ~/vcaml/lib/ocaml -I ~/vanilla/otherlibs/unix $(flag)
+vanilla = ~/vanilla/ocamlopt -nostdlib -I ~/vcaml/lib/ocaml -I ~/vanilla/otherlibs/unix -I ../ ../must.ml \
+        $(flag)
 time = time -f "%e"
