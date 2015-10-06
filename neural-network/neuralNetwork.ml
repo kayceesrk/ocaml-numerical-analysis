@@ -9,8 +9,8 @@ open Format
  * Utility functions for array
  * ================================================================= *)
 
-module Array = struct
-  include Array
+module Array_ = struct
+  include Array_
 
   let init_matrix m n f = init m (fun i -> init n (f i))
 
@@ -38,28 +38,28 @@ end
  * ================================================================= *)
 
 (** Dot product of two vectors *)
-let dot = Array.map2_sum ( *. )
+let dot = Array_.map2_sum ( *. )
 
 (** Execute [y := alpha * x + y] where [alpha] is a scalar, [x] and [y] are
     vectors. *)
 let axpy ~alpha x y =
-  let n = Array.length x in
+  let n = Array_.length x in
   for i = 0 to n - 1 do y.(i) <- alpha *. x.(i) +. y.(i) done
 
 (** [gemv a x y] computes [a * x + y] where [a] is a matrix, and [x] and [y] are
     vectors. *)
-let gemv a x y = Array.map2 (fun ai yi -> dot ai x +. yi) a y
+let gemv a x y = Array_.map2 (fun ai yi -> dot ai x +. yi) a y
 
 (** [gemv_t a x] computes [a^T * x] where [a] is a matrix and [x] is a vector.
 *)
 let gemv_t a x =
-  let (_, n) = Array.matrix_size a in
-  let y = Array.make n 0.0 in
-  Array.iter2 (fun ai xi -> axpy ~alpha:xi ai y) a x;
+  let (_, n) = Array_.matrix_size a in
+  let y = Array_.make n 0.0 in
+  Array_.iter2 (fun ai xi -> axpy ~alpha:xi ai y) a x;
   y
 
 (** [ger x y] computes outer product [x y^T] of vectors [x] and [y]. *)
-let ger x y = Array.map (fun xi -> Array.map (( *. ) xi) y) x
+let ger x y = Array_.map (fun xi -> Array_.map (( *. ) xi) y) x
 
 (* ================================================================= *
  * Multilayer neural network
@@ -81,10 +81,10 @@ let forwardprop lyrs x0 =
     x0 lyrs
 
 (** An error function (cross-entropy) *)
-let error y t = ~-. (Array.map2_sum (fun ti yi -> ti *. log yi) t y)
+let error y t = ~-. (Array_.map2_sum (fun ti yi -> ti *. log yi) t y)
 
 (** The derivative of an error function *)
-let error' = Array.map2 (fun yi ti -> ~-. ti /. yi)
+let error' = Array_.map2 (fun yi ti -> ~-. ti /. yi)
 
 (** Error backpropagation *)
 let backprop lyrs x0 t =
@@ -112,7 +112,7 @@ let train ~eta lyrs x0 t =
     (fun (x, delta) lyr ->
        let dw = ger delta x in
        let db = delta in
-       Array.iter2 (axpy ~alpha) dw lyr.weight;
+       Array_.iter2 (axpy ~alpha) dw lyr.weight;
        axpy ~alpha db lyr.bias)
     res lyrs
 
@@ -131,12 +131,12 @@ let approx_gradient ?(epsilon = 1e-4) lyrs x0 t =
     | [] -> failwith "empty neural network"
     | hd :: tl -> (hd, tl) in
   let lyr0_bias_eps i eps =
-    let bias = Array.mapi (fun j bj -> if i=j then bj+.eps else bj) lyr0.bias in
+    let bias = Array_.mapi (fun j bj -> if i=j then bj+.eps else bj) lyr0.bias in
     { lyr0 with bias }
   in
   let lyr0_weight_eps i j eps =
     let aux k l wkl = if i = k && j = l then wkl +. eps else wkl in
-    let weight = Array.mapi (fun k -> Array.mapi (aux k)) lyr0.weight in
+    let weight = Array_.mapi (fun k -> Array_.mapi (aux k)) lyr0.weight in
     { lyr0 with weight }
   in
   let calc_grad lyr0_eps =
@@ -145,9 +145,9 @@ let approx_gradient ?(epsilon = 1e-4) lyrs x0 t =
     let e_n = calc_error (lyr0_eps (~-. epsilon)) in
     (e_p -. e_n) /. (2.0 *. epsilon)
   in
-  let (m, n) = Array.matrix_size lyr0.weight in
-  let db = Array.init m (fun i -> calc_grad (lyr0_bias_eps i)) in
-  let dw = Array.init_matrix m n (fun i j -> calc_grad (lyr0_weight_eps i j)) in
+  let (m, n) = Array_.matrix_size lyr0.weight in
+  let db = Array_.init m (fun i -> calc_grad (lyr0_bias_eps i)) in
+  let dw = Array_.init_matrix m n (fun i j -> calc_grad (lyr0_weight_eps i j)) in
   (db, dw)
 
 let eq_significant_digits ?(epsilon = 1e-9) ?(digits = 1e-3) x y =
@@ -174,9 +174,9 @@ let check_gradient lyrs x0 t =
   let dw = ger delta x in
   let db = delta in
   let (db', dw') = approx_gradient lyrs x0 t in
-  Array.iteri2 (fun i -> warn (sprintf "dE/db[%d]" i)) db db';
-  Array.iteri2 (fun i ->
-      Array.iteri2 (fun j ->
+  Array_.iteri2 (fun i -> warn (sprintf "dE/db[%d]" i)) db db';
+  Array_.iteri2 (fun i ->
+      Array_.iteri2 (fun j ->
           warn (sprintf "dE/dw[%d,%d]" i j))) dw dw'
 
 (* ================================================================= *
@@ -184,23 +184,23 @@ let check_gradient lyrs x0 t =
  * ================================================================= *)
 
 (** The hyperbolic tangent *)
-let actv_tanh = Array.map tanh
+let actv_tanh = Array_.map tanh
 
 (** The derivative of the hyperbolic tangent *)
 let actv_tanh' z =
-  let n = Array.length z in
-  Array.init_matrix n n (fun i j -> if i=j then 1.0 -. z.(i) *. z.(i) else 0.0)
+  let n = Array_.length z in
+  Array_.init_matrix n n (fun i j -> if i=j then 1.0 -. z.(i) *. z.(i) else 0.0)
 
 (** The softmax function (used at the output layer for classification) *)
 let actv_softmax x =
-  let y = Array.map exp x in
-  let c = 1.0 /. Array.map_sum (fun yi -> yi) y in
-  Array.map (( *. ) c) y
+  let y = Array_.map exp x in
+  let c = 1.0 /. Array_.map_sum (fun yi -> yi) y in
+  Array_.map (( *. ) c) y
 
 (** The derivative of the softmax function *)
 let actv_softmax' z =
-  let n = Array.length z in
-  Array.init_matrix n n
+  let n = Array_.length z in
+  Array_.init_matrix n n
     (fun i j -> if i = j then (1.0 -. z.(i)) *. z.(i) else ~-. (z.(i) *. z.(j)))
 
 (** A linear function (used at the output layer for regression) *)
@@ -208,8 +208,8 @@ let actv_linear x = x
 
 (** The derivative of a linear function *)
 let actv_linear z =
-  let n = Array.length z in
-  Array.init_matrix n n (fun i j -> if i = j then 1.0 else 0.0)
+  let n = Array_.length z in
+  Array_.init_matrix n n (fun i j -> if i = j then 1.0 else 0.0)
 
 (* ================================================================= *
  * Main routine
@@ -219,17 +219,17 @@ let actv_linear z =
 let make_layer actv_f actv_f' dim1 dim2 =
   let rand () = Random.float 2.0 -. 1.0 in
   { actv_f; actv_f';
-    weight = Array.init_matrix dim2 dim1 (fun _ _ -> rand ());
-    bias = Array.init dim2 (fun _ -> rand ()); }
+    weight = Array_.init_matrix dim2 dim1 (fun _ _ -> rand ());
+    bias = Array_.init dim2 (fun _ -> rand ()); }
 
 (** Evaluate an error *)
 let evaluate lyrs samples =
-  Array.map_sum (fun (x, t) -> error (forwardprop lyrs x) t) samples
+  Array_.map_sum (fun (x, t) -> error (forwardprop lyrs x) t) samples
 
 let main samples =
   let (input_dim, output_dim) =
     let (x, t) = samples.(0) in
-    (Array.length x, Array.length t)
+    (Array_.length x, Array_.length t)
   in
   let hidden1_dim = 10 in
   let hidden2_dim = 5 in
@@ -238,7 +238,7 @@ let main samples =
     make_layer actv_tanh actv_tanh' hidden1_dim hidden2_dim;
     make_layer actv_softmax actv_softmax' hidden2_dim output_dim; ] in
   for i = 1 to 1000 do
-    Array.iter (fun (x, t) ->
+    Array_.iter (fun (x, t) ->
         (* check_gradient nnet x t; *)
         train ~eta:0.01 nnet x t) samples;
     if i mod 100 = 0

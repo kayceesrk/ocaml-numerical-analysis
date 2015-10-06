@@ -1,0 +1,5 @@
+OCAMLOPT=ocamlopt.opt
+ARRAYS=../array_.mli ../array_.ml
+COMPFLAGS=-inline 1000000000000 -I ../
+
+OCAML=$(OCAMLOPT) $(COMPFLAGS) $(ARRAYS)

@@ -1,0 +1,10 @@
+bin: [
+     "durand-kerner-aberth/dka"
+     "fft/fft"
+     "k-means/k-means"
+     "levinson-durbin/levinson"
+     "lu-decomposition/lu"
+     "neural-network/nn"
+     "qr-decomposition/qr"
+     "wav/wav"
+]

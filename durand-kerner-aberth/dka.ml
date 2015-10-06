@@ -6,8 +6,8 @@
 open Format
 open Complex
 
-module Array = struct
-  include Array
+module Array_ = struct
+  include Array_
 
   let fold_lefti f init x =
     let acc = ref init in
@@ -36,12 +36,12 @@ let pi = 3.14159265358979
     @param r a radius of a circle containing all roots on complex plane
  *)
 let roots_init_vals ?(r = 1000.) cs =
-  let n = Array.length cs in
+  let n = Array_.length cs in
   if n < 2 then invalid_arg "roots_init_vals: #coefficients < 2";
   let n = n - 1 in (* the order of a given polynominal *)
   let s = pi /. float n in
   let t = cs.(1) /! (cs.(0) *! { re = ~-. (float n); im = 0. }) in
-  Array.init n
+  Array_.init n
     (fun i ->
        let angle = s *. (2.0 *. float i +. 0.5) in
        t +! ({ re=r; im=0. } *! (exp { re=0.; im=angle })))
@@ -54,32 +54,124 @@ let roots ?(epsilon = 1e-6) ?init cs =
   let zs = match init with (* initial values of roots *)
     | None -> roots_init_vals cs
     | Some zs0 -> zs0 in
-  let calc_poly x = Array.fold_left (fun acc ci -> acc *! x +! ci) zero cs in
+  let calc_poly x = Array_.fold_left (fun acc ci -> acc *! x +! ci) zero cs in
   let cn = cs.(0) in (* c(n) *)
   let rec update_z zs = (* update z(0), ..., z(n-1) until they converge *)
     let update_zi zs i zi = (* update z(i) *)
-      let deno = Array.fold_lefti
+      let deno = Array_.fold_lefti
           (fun j acc zj -> if i = j then acc else acc *! (zi -! zj)) cn zs in
       zi -! calc_poly zi /! deno
     in
-    let zs' = Array.mapi (update_zi zs) zs in (* new z(0),...,z(n-1) *)
-    if Array.for_all2 (fun zi zi' -> norm2 (zi -! zi') < epsilon) zs zs'
+    let zs' = Array_.mapi (update_zi zs) zs in (* new z(0),...,z(n-1) *)
+    if Array_.for_all2 (fun zi zi' -> norm2 (zi -! zi') < epsilon) zs zs'
     then zs' (* converged! *)
     else update_z zs'
   in
   update_z zs
 
+let cs = [|
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(320.); im=0. };
+  { re=(-300.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(320.); im=0. };
+  { re=(-300.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(30.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(32.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(30.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(30.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(320.); im=0. };
+  { re=(-10.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-6.); im=0. };
+  { re=(-5.); im=0. };
+  { re=(32.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-5.); im=0. };
+  { re=(320.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-2.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(320.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(32.); im=0. };
+  { re=(-300.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(32.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(320.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(30.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-26.); im=0. };
+  { re=(-59.); im=0. };
+  { re=(32.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+  { re=(-6.); im=0. };
+  { re=(-9.); im=0. };
+  { re=(30.); im=0. };
+  { re=(-30.); im=0.};
+  { re=2.; im=0. };
+  { re=5.; im=0. };
+|]
+
 let main () =
-  (* -300 + 320 x - 59 x^2 - 26 x^3 + 5 x^4 + 2 x^5 = 0 *)
-  let cs = [|
-    { re=2.; im=0. };
-    { re=5.; im=0. };
-    { re=(-26.); im=0. };
-    { re=(-59.); im=0. };
-    { re=(320.); im=0. };
-    { re=(-300.); im=0.};
-  |] in
   let roots = roots cs in
-  Array.iter (fun { re; im } -> printf "%g %+gi@." re im) roots
+  Array_.iter (fun { re; im } -> printf "%g %+gi@." re im) roots
 
 let () = main ()

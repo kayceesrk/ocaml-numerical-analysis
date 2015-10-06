@@ -27,13 +27,13 @@ let ( /! ) = div
 let make_twiddle_factors len =
   let pi = 3.14159265358979 in
   let c = ~-. 2.0 *. pi /. float len in
-  Array.init (len / 2) (fun i -> exp { re = 0.; im = c *. float i })
+  Array_.init (len / 2) (fun i -> exp { re = 0.; im = c *. float i })
 
 let fft x =
-  let len = Array.length x in
+  let len = Array_.length x in
   let n_bits = get_n_bits len in
   let w = make_twiddle_factors len in
-  let y = Array.init len (fun i -> x.(bitrev n_bits i)) in
+  let y = Array_.init len (fun i -> x.(bitrev n_bits i)) in
   let butterfly m n ofs =
     for i = 0 to n / 2 - 1 do
       let j, k = ofs + i, ofs + i + n / 2 in
@@ -50,23 +50,24 @@ let fft x =
   y
 
 let ifft x =
-  let c = 1.0 /. float (Array.length x) in
+  let c = 1.0 /. float (Array_.length x) in
   let normalize z = { re = c *. z.re; im = ~-. c *. z.im } in
-  fft (Array.map normalize x)
+  fft (Array_.map normalize x)
+
+let arr =
+  let len =
+    if Array_.length Sys.argv = 1
+    then (1024 * 1024) else int_of_string Sys.argv.(1) in
+  Array_.init len (fun i -> { re = float_of_int i; im = 0.0})
 
 let main () =
-  let x = [|
-    1.0; 2.0; 3.0; 4.0; 5.0; 6.0; 7.0; 8.0;
-    9.0; 10.0; 11.0; 12.0; 13.0; 14.0; 15.0; 16.0;
-  |]
-    |> Array.map (fun x -> { re = x; im = 0.0 }) in
-  let y = fft x in
+  let y = fft arr in
   printf "FFT =@\n  @[";
-  Array.iteri (fun i yi -> printf "[%d] %f %+fi@\n" i yi.re yi.im) y;
+  Array_.iteri (fun i yi -> printf "[%d] %f %+fi@\n" i yi.re yi.im) y;
   printf "@]@\n";
   let z = ifft y in
   printf "IFFT =@\n  @[";
-  Array.iteri (fun i zi -> printf "[%d] %f %+fi@\n" i zi.re zi.im) z;
+  Array_.iteri (fun i zi -> printf "[%d] %f %+fi@\n" i zi.re zi.im) z;
   printf "@]@."
 
 let () = main ()

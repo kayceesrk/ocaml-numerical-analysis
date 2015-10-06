@@ -46,8 +46,8 @@ let output_le_s16f oc x = output_le_s16 oc (int_of_float (x *. 32768.))
 
 let save ?(sampling_bits = 16) ~sampling_rate filename x =
   let channels, n = match x with
-    | MONORAL x -> 1, Array.length x
-    | STEREO x -> 2, Array.length x in
+    | MONORAL x -> 1, Array_.length x
+    | STEREO x -> 2, Array_.length x in
   let output_pt = match sampling_bits with
     | 8 -> output_le_s8f
     | 16 -> output_le_s16f
@@ -68,8 +68,8 @@ let save ?(sampling_bits = 16) ~sampling_rate filename x =
   output_string oc "data"; (* DATA chunk *)
   output_le_u31 oc data_bytes; (* #bytes of DATA chunk *)
   begin match x with
-    | MONORAL x -> Array.iter (output_pt oc) x
-    | STEREO x -> Array.iter (fun (l, r) -> output_pt oc l ; output_pt oc r) x
+    | MONORAL x -> Array_.iter (output_pt oc) x
+    | STEREO x -> Array_.iter (fun (l, r) -> output_pt oc l ; output_pt oc r) x
   end;
   close_out oc
 
@@ -111,8 +111,8 @@ let load_points ~data_bytes ~sampling_bits ~channels ic =
     (x, y)
   in
   match channels with
-  | 1 -> MONORAL (Array.init n (fun _ -> input_pt ic))
-  | 2 -> STEREO (Array.init n (fun _ -> input_pt2 ic))
+  | 1 -> MONORAL (Array_.init n (fun _ -> input_pt ic))
+  | 2 -> STEREO (Array_.init n (fun _ -> input_pt2 ic))
   | _ -> failwith "Unexpected #channels"
 
 let load filename =

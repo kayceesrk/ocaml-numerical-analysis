@@ -1,0 +1,15 @@
+opam-version: "1.2"
+name: "numerical-bench"
+version: "1.0"
+maintainer: "Ryohei Tokuda <tokuda@sf.ecei.tohoku.ac.jp>"
+authors: "Various"
+homepage: "https://github.com/OCamlPro/ocaml-benchs"
+bug-reports: "https://github.com/OCamlPro/ocaml-benchs/issues"
+license: "Various"
+build: [
+  [ make all ]
+]
+depends: []
+depopts: []
+conflicts: []
+dev-repo: "git@github.com:OCamlPro/ocaml-benchs.git"

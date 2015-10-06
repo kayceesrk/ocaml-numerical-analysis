@@ -5,8 +5,8 @@
 
 open Format
 
-module Array = struct
-  include Array
+module Array_ = struct
+  include Array_
 
   (** [mapi_sum f [|x1; x2; ...; xn|]] is [f x1 +. f x2 +. ... +. f xn]. *)
   let mapi_sum f x =
@@ -18,8 +18,8 @@ end
 (** [autocorr x tau] computes autocorrelation [[|r(0); r(1); ...; [r(tau)]|]].
 *)
 let autocorr x tau =
-  let n = Array.length x in
-  let r = Array.make (tau + 1) 0.0 in
+  let n = Array_.length x in
+  let r = Array_.make (tau + 1) 0.0 in
   for i = 0 to tau do
     for t = 0 to n-i-1 do r.(i) <- r.(i) +. x.(t) *. x.(t + i) done
   done;
@@ -31,14 +31,14 @@ let autocorr x tau =
     coefficient of AR([n]) and [sigma2] is variance of errors.
 *)
 let levinson r =
-  let n = Array.length r in
+  let n = Array_.length r in
   if n = 0 then failwith "empty autocorrelation";
   let rec aux m ar sigma2 =
     let m' = m + 1 in
     if m' = n then (ar, sigma2)
     else begin
-      let ar' = Array.make (m+1) 0.0 in
-      ar'.(m) <- (r.(m+1) -. Array.mapi_sum (fun i ai -> ai *. r.(m-i)) ar)
+      let ar' = Array_.make (m+1) 0.0 in
+      ar'.(m) <- (r.(m+1) -. Array_.mapi_sum (fun i ai -> ai *. r.(m-i)) ar)
                  /. sigma2;
       for i = 0 to m-1 do ar'.(i) <- ar.(i) -. ar'.(m) *. ar.(m-1-i) done;
       let sigma2' = sigma2 *. (1.0 -. ar'.(m) *. ar'.(m)) in
@@ -50,7 +50,7 @@ let levinson r =
 let print_ar_coeffs label data order =
   let r = autocorr data (order + 1) in
   let (ar, sigma2) = levinson r in
-  let ar_str = Array.to_list ar
+  let ar_str = Array_.to_list ar
                |> List.map (sprintf "%g")
                |> String.concat "; " in
   printf "%s:@\n  @[AR = [|%s|]@\nsigma^2 = %g@]@." label ar_str sigma2
