@@ -72,10 +72,3 @@ let main () =
   arr
   |> fft
   |> ifft
-
-let () =
-  Gc.major ();
-  let t1 = Unix.times () in
-  main ();
-  let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)

@@ -31,11 +31,6 @@ let map_sum f =  Array.fold_left (fun acc xi -> acc +. f xi) 0.0
 let map2_sum f = fold_left2 (fun acc xi yi -> acc +. f xi yi) 0.0
 
 
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
 (* ================================================================= *
  * BLAS-like functions for linear algebraic operations
  * ================================================================= *)
@@ -244,16 +239,8 @@ let main samples =
     Array.iter (fun (x, t) ->
         (* check_gradient nnet x t; *)
         train ~eta:0.01 nnet x t) samples;
-    Gc.minor ()
     (* if i mod 100 = 0 *)
     (* then printf "Loop #%d: Error = %g@." i (evaluate nnet samples) *)
   done
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let () =
-  let t1 = Unix.times () in
-  main Dataset.samples;
-  let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)
+let main () = main Dataset.samples

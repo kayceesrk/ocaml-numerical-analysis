@@ -2832,12 +2832,3 @@ let main () =
   (* print_mat "matrix P" p; *)
   (* print_mat "matrix P * L * U" a' *)
   a'
-
-let gather t =
-  t.Unix.tms_utime +. t.tms_stime +. t.tms_cutime +. t.tms_cstime
-
-let () =
-  let t1 = Unix.times () in
-  main ();
-  let t2 = Unix.times () in
-  Format.printf "%f \n" (gather t2 -. gather t1)

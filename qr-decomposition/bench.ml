@@ -108,11 +108,6 @@ let print_mat label x =
       Array.iter (printf "  %8.4f") xi;
       print_newline ()) x
 
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
 let a =
     [|
       [| 3.; 5.; 0.; 0.; 1.;  3.; 5.; 0.; 0.; 1.; 3.; 5.; 0.; 0.; 1.;  3.; 5.; 0.; 0.; 1.;  3.; 5.; 0.; 0.; 1.; 3.; 5.; 0.; 0.; 1.|];
@@ -341,12 +336,3 @@ let main () =
   (* print_mat "Q" q; *)
   (* print_mat "R" r; *)
   (* print_mat "Q * R" *) (gemm q r)
-
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let () =
-  let t1 = Unix.times () in
-  main ();
-  let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)

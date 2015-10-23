@@ -1,33 +1,25 @@
-include Makefile.shared
+BENCHES = $(wildcard */)
 
-TESTS = naive-multilayer durand-kerner-aberth fft k-means \
-	levinson-durbin lu-decomposition qr-decomposition \
-	rnd_access simple_access
+OCAMLOPT = ocamlopt.opt
+OCAMLDEP = ocamldep.opt
 
-RESULTS=$(foreach ITEM, $(TESTS), $(ITEM)/my.result $(ITEM)/vanilla.result)
+ifdef GCSTATS
+  MAINSRC = main_gcstats.ml
+  LINK = unix.cmxa
+else
+  MAINSRC = main_nogcstats.ml
+  LINK =
+endif
 
-all: $(foreach ITEM, $(TESTS), $(ITEM)/my $(ITEM)/vanilla)
+all: $(BENCHES:/=.opt)
 
-.PHONY: clean clean_result average
 
-.PRECIOUS: $(RESULTS)
+all-gcstats: $(BENCHES:/=-gcstats.opt)
 
-do_test: $(RESULTS)
+%.opt: $(MAINSRC) %/*.ml
+	ulimit -s 98304; $(OCAMLOPT) $(LINK) -I $* `$(OCAMLDEP) -sort $*/*.ml` $< -o $@
+# Huge stack is required to compile k-means
 
-%/my: %/*.ml
-	cd $(dir $@) && make my
-
-%/vanilla: %/*.ml
-	cd $(dir $@) && make vanilla
-
-%.result: %
-	for i in `seq 10`; do $(basename ./$@) >> ./$@; done
-
+.PHONY: clean
 clean:
-	rm -f */my */vanilla */*.cm? */*.o */*.clam
-
-clean_result:
-	find -name "*.result" -exec rm {} \;
-
-average:
-	find -name "*.result" -exec ./average {} \;
+	rm -f *.cm* *.o *.opt *-gcstats.opt */*.cm* */*.o

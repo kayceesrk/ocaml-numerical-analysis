@@ -70,14 +70,6 @@ let show_result k xs cs =
     done
   done
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = 80 * 40 }
-
 let main () =
   let k = Dataset.n_classes in
   let xs = Array.map fst Dataset.samples in
@@ -90,9 +82,3 @@ let main () =
   (*     print_newline ()) *)
   (*   means; *)
   (* show_result k xs cs *)
-
-let () =
-  let t1 = Unix.times () in
-  main ();
-  let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)

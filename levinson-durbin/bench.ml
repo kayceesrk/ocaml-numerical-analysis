@@ -53,14 +53,6 @@ let print_ar_coeffs label data order =
   (*              |> String.concat "; " in *)
   (* printf "%s:@\n  @[AR = [|%s|]@\nsigma^2 = %g@]@." label ar_str sigma2 *)
 
-let gather t =
-  t.Unix.tms_utime +. t.Unix.tms_stime +. t.Unix.tms_cutime +. t.Unix.tms_cstime
-
-let c = Gc.get ()
-let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
-             Gc.space_overhead = max_int }
-
 let len =
   if Array.length Sys.argv = 1
   then 10000
@@ -68,14 +60,8 @@ let len =
 
 let main () =
   let order = len in (* AR order *)
-  print_ar_coeffs "Sound /a/" Dataset.a order;
-  print_ar_coeffs "Sound /i/" Dataset.i order;
-  print_ar_coeffs "Sound /u/" Dataset.u order;
-  print_ar_coeffs "Sound /e/" Dataset.e order;
-  print_ar_coeffs "Sound /o/" Dataset.o order
-
-let () =
-  let t1 = Unix.times () in
-  main () |> ignore;
-  let t2 = Unix.times () in
-  Format.printf "%f\n" (gather t2 -. gather t1)
+  ignore (print_ar_coeffs "Sound /a/" Dataset.a order);
+  ignore (print_ar_coeffs "Sound /i/" Dataset.i order);
+  ignore (print_ar_coeffs "Sound /u/" Dataset.u order);
+  ignore (print_ar_coeffs "Sound /e/" Dataset.e order);
+  ignore (print_ar_coeffs "Sound /o/" Dataset.o order)
