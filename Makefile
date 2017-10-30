@@ -17,7 +17,7 @@ all: $(BENCHES:/=.opt)
 all-gcstats: $(BENCHES:/=-gcstats.opt)
 
 %.opt: $(MAINSRC) %/*.ml
-	ulimit -s 98304; $(OCAMLOPT) $(LINK) -I $* `$(OCAMLDEP) -sort $*/*.ml` $< -o $@
+	ulimit -s 983040; $(OCAMLOPT) $(LINK) -I $* `$(OCAMLDEP) -sort $*/*.ml` $< -o $@
 # Huge stack is required to compile k-means
 
 .PHONY: clean
