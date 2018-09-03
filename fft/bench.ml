@@ -56,7 +56,7 @@ let ifft x =
 
 let c = Gc.get ()
 let () = Gc.set
-    { c with Gc.minor_heap_size = 32000000;
+    { c with Gc.minor_heap_size = 2000000;
              Gc.space_overhead = 80 * 20 }
 
 let gather t =
