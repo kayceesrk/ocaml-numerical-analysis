@@ -1,7 +1,9 @@
 BENCHES = $(wildcard */)
 
-OCAMLOPT = ocamlopt.opt
-OCAMLDEP = ocamldep.opt
+OCAMLOPT = ../ocaml-multicore/ocamlopt.opt -I ../ocaml-multicore/stdlib -I ../ocaml-multicore/otherlibs/unix
+OCAMLDEP = ../ocaml-multicore/byterun/ocamlrun ../ocaml-multicore/tools/ocamldep
+#OCAMLOPT = ocamlopt.opt
+#OCAMLDEP = ocamldep.opt
 
 ifdef GCSTATS
   MAINSRC = main_gcstats.ml
