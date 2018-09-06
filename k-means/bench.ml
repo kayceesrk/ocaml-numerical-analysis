@@ -54,7 +54,6 @@ let kmeans k xs =
   let cs = Array.init m (fun i -> i mod k) in (* class assignment *)
   let rec loop () =
     let means = calc_means cs in
-    Gc.minor ();
     if update means cs then loop () else (means, cs)
   in
   loop () (* loop until convergence *)
